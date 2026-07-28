@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dino Run</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="game-shell">
+      <div class="game-frame">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="overlay-card">
+            <h2 id="overlayTitle">Dino Run</h2>
+            <p id="overlayText">Jump over obstacles and duck under birds.</p>
+            <button id="startBtn" class="primary-btn">Start Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

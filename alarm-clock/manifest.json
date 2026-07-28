@@ -1,0 +1,13 @@
+{
+  "name": "Alarm Clock",
+  "short_name": "Alarm",
+  "description": "An alarm clock with multiple alarms, repeat days, and snooze",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#16181a",
+  "theme_color": "#16181a",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

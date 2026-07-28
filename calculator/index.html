@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scientific Calculator</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#16181a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16181a;
+    --panel: #1e2124;
+    --lcd-bg: #0c1a10;
+    --lcd-glow: #4ade80;
+    --lcd-dim: #2f6b45;
+    --key-face: #2a2d30;
+    --key-face-hover: #35383c;
+    --key-num: #eef1ee;
+    --key-op: #e8a33d;
+    --key-op-hover: #f3b757;
+    --key-sci: #6b8fb0;
+    --key-danger: #c05656;
+    --border: #33373a;
+    --text-dim: #8a9088;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--key-num);
+    padding: 24px;
+  }
+
+  .device {
+    width: 100%;
+    max-width: 920px;
+    background: var(--panel);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    padding: 22px;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 18px;
+  }
+
+  @media (max-width: 720px) {
+    .device { grid-template-columns: 1fr; }
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 2px 6px 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+
+  .brand-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .brand-model {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--key-sci);
+    letter-spacing: 0.12em;
+  }
+
+  .main-panel { display: flex; flex-direction: column; gap: 14px; }
+
+  .lcd {
+    background: var(--lcd-bg);
+    border: 1px solid #163420;
+    border-radius: 10px;
+    padding: 18px 18px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lcd::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.15) 0px,
+      rgba(0,0,0,0.15) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+  }
+
+  .lcd-mode {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--lcd-dim);
+    letter-spacing: 0.15em;
+    min-height: 14px;
+  }
+
+  .lcd-expression {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    color: var(--lcd-dim);
+    min-height: 22px;
+    word-break: break-all;
+    margin-top: 6px;
+  }
+
+  .lcd-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px;
+    font-weight: 500;
+    color: var(--lcd-glow);
+    text-shadow: 0 0 12px rgba(74, 222, 128, 0.45);
+    text-align: right;
+    margin-top: 6px;
+    word-break: break-all;
+    min-height: 48px;
+  }
+
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  button {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 9px;
+    padding: 13px 0;
+    cursor: pointer;
+    background: var(--key-face);
+    color: var(--key-num);
+    transition: background 0.12s ease, transform 0.05s ease;
+  }
+
+  button:hover { background: var(--key-face-hover); }
+  button:active { transform: scale(0.96); }
+  button:focus-visible { outline: 2px solid var(--key-sci); outline-offset: 2px; }
+
+  .sci { background: transparent; color: var(--key-sci); border: 1px solid #2c3d4a; font-size: 13px; }
+  .sci:hover { background: rgba(107,143,176,0.12); }
+
+  .op { background: transparent; color: var(--key-op); border: 1px solid #4a3a20; font-size: 18px; }
+  .op:hover { background: rgba(232,163,61,0.12); }
+
+  .num { font-size: 17px; }
+
+  .equals { background: var(--key-op); color: #1a1206; font-weight: 700; grid-column: span 2; }
+  .equals:hover { background: var(--key-op-hover); }
+
+  .danger { color: var(--key-danger); border: 1px solid #4a2626; background: transparent; }
+  .danger:hover { background: rgba(192,86,86,0.12); }
+
+  .zero { grid-column: span 2; }
+
+  .history-panel {
+    background: #1a1c1e;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .history-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .clear-history-btn {
+    background: none;
+    border: none;
+    color: var(--key-danger);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 4px 8px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .clear-history-btn:hover { color: #e07a7a; }
+
+  .history-list {
+    overflow-y: auto;
+    max-height: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-item {
+    background: var(--lcd-bg);
+    border-radius: 8px;
+    padding: 9px 11px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .history-item:hover { border-color: #2c4a34; }
+
+  .history-expr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--lcd-dim);
+    word-break: break-all;
+  }
+
+  .history-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--lcd-glow);
+    text-align: right;
+  }
+
+  .history-empty {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 20px 8px;
+    text-align: center;
+  }
+
+  .error-flash {
+    color: var(--key-danger) !important;
+    text-shadow: none !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="brand">
+    <span class="brand-name">Scientific Calculator</span>
+    <span class="brand-model">MODE: RAD</span>
+  </div>
+
+  <div class="main-panel">
+    <div class="lcd">
+      <div class="lcd-mode" id="lcdMode">&nbsp;</div>
+      <div class="lcd-expression" id="lcdExpression">&nbsp;</div>
+      <div class="lcd-result" id="lcdResult">0</div>
+    </div>
+
+    <div class="keys">
+      <button class="sci" data-fn="sin">sin</button>
+      <button class="sci" data-fn="cos">cos</button>
+      <button class="sci" data-fn="tan">tan</button>
+      <button class="sci" data-fn="log">log</button>
+      <button class="sci" data-fn="ln">ln</button>
+
+      <button class="sci" data-fn="sqrt">√</button>
+      <button class="sci" data-insert="^">x^y</button>
+      <button class="sci" data-fn="fact">x!</button>
+      <button class="sci" data-insert="(">(</button>
+      <button class="sci" data-insert=")">)</button>
+
+      <button class="danger" data-action="clear">C</button>
+      <button class="danger" data-action="backspace">⌫</button>
+      <button class="sci" data-insert="%">%</button>
+      <button class="op" data-insert="/">÷</button>
+      <button class="op" data-insert="*">×</button>
+
+      <button class="num" data-num="7">7</button>
+      <button class="num" data-num="8">8</button>
+      <button class="num" data-num="9">9</button>
+      <button class="op" data-insert="-">−</button>
+      <button class="sci" data-insert="pi">π</button>
+
+      <button class="num" data-num="4">4</button>
+      <button class="num" data-num="5">5</button>
+      <button class="num" data-num="6">6</button>
+      <button class="op" data-insert="+" style="grid-row: span 2;">+</button>
+      <button class="sci" data-insert="e">e</button>
+
+      <button class="num" data-num="1">1</button>
+      <button class="num" data-num="2">2</button>
+      <button class="num" data-num="3">3</button>
+      <button class="num" data-num="." style="grid-column: span 1;">.</button>
+
+      <button class="num zero" data-num="0">0</button>
+      <button class="equals" data-action="equals">=</button>
+    </div>
+  </div>
+
+  <div class="history-panel">
+    <div class="history-header">
+      <span class="history-title">History</span>
+      <button class="clear-history-btn" id="clearHistoryBtn">clear all</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">No calculations yet</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- State ----------
+let expression = "";
+let history = []; // in-memory only, per session
+
+const lcdExpression = document.getElementById('lcdExpression');
+const lcdResult = document.getElementById('lcdResult');
+const historyList = document.getElementById('historyList');
+
+// ---------- Display helpers ----------
+function updateExpressionDisplay() {
+  lcdExpression.textContent = expression.length ? formatForDisplay(expression) : '\u00A0';
+}
+
+function formatForDisplay(expr) {
+  return expr
+    .replaceAll('*', '×')
+    .replaceAll('/', '÷')
+    .replaceAll('pi', 'π');
+}
+
+function showResult(value, isError = false) {
+  lcdResult.textContent = value;
+  lcdResult.classList.toggle('error-flash', isError);
+}
+
+// ---------- Tokenizer ----------
+// Turns "3+sin(45)*2" into tokens: numbers, operators, functions, parens
+function tokenize(expr) {
+  const tokens = [];
+  let i = 0;
+  const funcs = ['sin', 'cos', 'tan', 'log', 'ln', 'sqrt'];
+
+  while (i < expr.length) {
+    const ch = expr[i];
+
+    if (ch === ' ') { i++; continue; }
+
+    if (/[0-9.]/.test(ch)) {
+      let num = '';
+      while (i < expr.length && /[0-9.]/.test(expr[i])) { num += expr[i]; i++; }
+      tokens.push({ type: 'num', value: parseFloat(num) });
+      continue;
+    }
+
+    if (expr.startsWith('pi', i)) { tokens.push({ type: 'num', value: Math.PI }); i += 2; continue; }
+    if (expr[i] === 'e' && !/[a-zA-Z]/.test(expr[i+1] || '')) { tokens.push({ type: 'num', value: Math.E }); i += 1; continue; }
+
+    let matchedFunc = funcs.find(f => expr.startsWith(f, i));
+    if (matchedFunc) { tokens.push({ type: 'func', value: matchedFunc }); i += matchedFunc.length; continue; }
+
+    if ('+-*/^%()!'.includes(ch)) { tokens.push({ type: 'op', value: ch }); i++; continue; }
+
+    throw new Error('Unexpected character: ' + ch);
+  }
+  return tokens;
+}
+
+// ---------- Recursive-descent parser (respects precedence + functions) ----------
+// Grammar (highest to lowest precedence):
+// factorial(!) > power(^, right-assoc) > unary(-) > mul/div/mod > add/sub
+function parse(tokens) {
+  let pos = 0;
+  const peek = () => tokens[pos];
+  const consume = () => tokens[pos++];
+
+  function parseExpression() { return parseAddSub(); }
+
+  function parseAddSub() {
+    let left = parseMulDiv();
+    while (peek() && peek().type === 'op' && (peek().value === '+' || peek().value === '-')) {
+      const op = consume().value;
+      const right = parseMulDiv();
+      left = op === '+' ? left + right : left - right;
+    }
+    return left;
+  }
+
+  function parseMulDiv() {
+    let left = parseUnary();
+    while (peek() && peek().type === 'op' && (peek().value === '*' || peek().value === '/' || peek().value === '%')) {
+      const op = consume().value;
+      const right = parseUnary();
+      if (op === '*') left = left * right;
+      else if (op === '/') {
+        if (right === 0) throw new Error('Division by zero');
+        left = left / right;
+      } else left = left % right;
+    }
+    return left;
+  }
+
+  function parseUnary() {
+    if (peek() && peek().type === 'op' && peek().value === '-') {
+      consume();
+      return -parseUnary();
+    }
+    return parsePower();
+  }
+
+  function parsePower() {
+    let left = parsePostfix();
+    if (peek() && peek().type === 'op' && peek().value === '^') {
+      consume();
+      const right = parseUnary(); // right-associative, allows negative exponents
+      left = Math.pow(left, right);
+    }
+    return left;
+  }
+
+  function parsePostfix() {
+    let val = parseAtom();
+    while (peek() && peek().type === 'op' && peek().value === '!') {
+      consume();
+      val = factorial(val);
+    }
+    return val;
+  }
+
+  function parseAtom() {
+    const tok = peek();
+    if (!tok) throw new Error('Unexpected end of expression');
+
+    if (tok.type === 'num') { consume(); return tok.value; }
+
+    if (tok.type === 'func') {
+      consume();
+      if (!peek() || peek().value !== '(') throw new Error('Expected ( after ' + tok.value);
+      consume();
+      const arg = parseExpression();
+      if (!peek() || peek().value !== ')') throw new Error('Expected )');
+      consume();
+      return applyFunc(tok.value, arg);
+    }
+
+    if (tok.type === 'op' && tok.value === '(') {
+      consume();
+      const val = parseExpression();
+      if (!peek() || peek().value !== ')') throw new Error('Expected )');
+      consume();
+      return val;
+    }
+
+    throw new Error('Unexpected token: ' + tok.value);
+  }
+
+  const result = parseExpression();
+  if (pos !== tokens.length) throw new Error('Unexpected trailing input');
+  return result;
+}
+
+function applyFunc(name, arg) {
+  switch (name) {
+    case 'sin': return Math.sin(arg * Math.PI / 180); // degrees
+    case 'cos': return Math.cos(arg * Math.PI / 180);
+    case 'tan': return Math.tan(arg * Math.PI / 180);
+    case 'log': return Math.log10(arg);
+    case 'ln': return Math.log(arg);
+    case 'sqrt':
+      if (arg < 0) throw new Error('Cannot take sqrt of negative number');
+      return Math.sqrt(arg);
+    default: throw new Error('Unknown function: ' + name);
+  }
+}
+
+function factorial(n) {
+  if (n < 0 || !Number.isInteger(n)) throw new Error('Factorial needs a non-negative integer');
+  if (n > 170) throw new Error('Number too large');
+  let result = 1;
+  for (let i = 2; i <= n; i++) result *= i;
+  return result;
+}
+
+function evaluate(expr) {
+  const tokens = tokenize(expr);
+  if (tokens.length === 0) throw new Error('Empty expression');
+  return parse(tokens);
+}
+
+// ---------- History ----------
+function addToHistory(expr, result) {
+  history.unshift({ expr, result });
+  if (history.length > 50) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  if (history.length === 0) {
+    historyList.innerHTML = '<div class="history-empty">No calculations yet</div>';
+    return;
+  }
+  historyList.innerHTML = '';
+  history.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `<div class="history-expr">${formatForDisplay(item.expr)}</div><div class="history-result">${item.result}</div>`;
+    div.addEventListener('click', () => {
+      expression = String(item.result);
+      updateExpressionDisplay();
+      showResult(item.result);
+    });
+    historyList.appendChild(div);
+  });
+}
+
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  history = [];
+  renderHistory();
+});
+
+// ---------- Button wiring ----------
+document.querySelectorAll('[data-num]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    expression += btn.dataset.num;
+    updateExpressionDisplay();
+  });
+});
+
+document.querySelectorAll('[data-insert]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    expression += btn.dataset.insert;
+    updateExpressionDisplay();
+  });
+});
+
+document.querySelectorAll('[data-fn]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    expression += btn.dataset.fn + '(';
+    updateExpressionDisplay();
+  });
+});
+
+document.querySelector('[data-action="clear"]').addEventListener('click', () => {
+  expression = '';
+  updateExpressionDisplay();
+  showResult('0');
+});
+
+document.querySelector('[data-action="backspace"]').addEventListener('click', () => {
+  expression = expression.slice(0, -1);
+  updateExpressionDisplay();
+});
+
+document.querySelector('[data-action="equals"]').addEventListener('click', () => {
+  if (!expression.trim()) return;
+  try {
+    const result = evaluate(expression);
+    const rounded = Math.round(result * 1e10) / 1e10; // clean floating point noise
+    showResult(rounded);
+    addToHistory(expression, rounded);
+    expression = String(rounded);
+    updateExpressionDisplay();
+  } catch (err) {
+    showResult('Error', true);
+  }
+});
+
+// ---------- Keyboard support ----------
+document.addEventListener('keydown', (e) => {
+  if (/[0-9.]/.test(e.key)) { expression += e.key; updateExpressionDisplay(); }
+  else if (['+','-','*','/','(',')','%','^'].includes(e.key)) { expression += e.key; updateExpressionDisplay(); }
+  else if (e.key === 'Enter' || e.key === '=') { document.querySelector('[data-action="equals"]').click(); }
+  else if (e.key === 'Backspace') { expression = expression.slice(0, -1); updateExpressionDisplay(); }
+  else if (e.key === 'Escape') { document.querySelector('[data-action="clear"]').click(); }
+});
+
+updateExpressionDisplay();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {
+      // Fails silently if not served over http/https (e.g. opened as a local file)
+    });
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intern Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16181a;
+    --panel: #1e2124;
+    --lcd-bg: #0c1a10;
+    --lcd-glow: #4ade80;
+    --lcd-dim: #2f6b45;
+    --key-op: #e8a33d;
+    --key-sci: #6b8fb0;
+    --border: #33373a;
+    --text-dim: #8a9088;
+    --key-num: #eef1ee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); font-family: 'Space Grotesk', sans-serif; color: var(--key-num); padding: 24px;
+  }
+  .wrap { width: 100%; max-width: 760px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header-eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--lcd-dim); margin-bottom: 8px;
+  }
+  .header h1 { font-size: 28px; margin: 0; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px 22px; text-decoration: none; color: inherit; display: block;
+    transition: border-color 0.15s ease, transform 0.1s ease;
+  }
+  .card:hover { border-color: var(--lcd-glow); transform: translateY(-2px); }
+
+  .card-icon {
+    width: 52px; height: 52px; border-radius: 12px; background: var(--lcd-bg);
+    border: 1px solid #163420; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px; font-size: 24px; color: var(--lcd-glow);
+  }
+  .card-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .card-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin-bottom: 14px; }
+  .card-cta {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--key-op);
+  }
+  .card-cta::after { content: " →"; }
+
+  .footer {
+    text-align: center; margin-top: 28px; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="header-eyebrow">Internship Project</div>
+    <h1>App Collection</h1>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="calculator/index.html">
+      <div class="card-icon">42</div>
+      <div class="card-title">Scientific Calculator</div>
+      <div class="card-desc">Full scientific operations with precedence-aware evaluation and calculation history.</div>
+      <div class="card-cta">Open app</div>
+    </a>
+
+    <a class="card" href="alarm-clock/index.html">
+      <div class="card-icon">⏰</div>
+      <div class="card-title">Alarm Clock</div>
+      <div class="card-desc">Multiple alarms, repeat days, snooze, and a live clock display.</div>
+      <div class="card-cta">Open app</div>
+    </a>
+
+    <a class="card" href="snake-game/index.html">
+      <div class="card-icon">▦</div>
+      <div class="card-title">Snake Game</div>
+      <div class="card-desc">Classic snake with arrow key or on-screen D-pad controls.</div>
+      <div class="card-cta">Open app</div>
+    </a>
+
+    <a class="card" href="dino-game/index.html">
+      <div class="card-icon">🦖</div>
+      <div class="card-title">Dino Runner</div>
+      <div class="card-desc">Endless runner — jump obstacles with Space, tap, or click.</div>
+      <div class="card-cta">Open app</div>
+    </a>
+  </div>
+
+  <div class="footer">Built with HTML · CSS · JavaScript</div>
+</div>
+
+</body>
+</html>
